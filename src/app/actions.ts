@@ -12,21 +12,21 @@ type Result = {
   }> | null | ZodError
 };
 
-type RHFData = {
+type ZodData = {
+  title?: string | undefined,
   firstName: string,
   lastName: string,
-  age: number | null,
-  title?: string | undefined
+  age: string | null
 };
 
-async function ServerAction(prevState: Result, rhfData: RHFData): Promise<Result> {
+async function ServerAction(prevState: Result, zodData: ZodData): Promise<Result> {
   console.log('ServerAction:prevState', prevState);
-  console.log('ServerAction:rhfData', rhfData);
+  console.log('ServerAction:rhfData', zodData);
 
-  const isValid = formSchema.safeParse(rhfData);
+  const isValid = formSchema.safeParse(zodData);
 
   console.log('ServerAction:isValid', isValid);
-  console.log('ServerAction:error', isValid.error);
+  console.log('ServerAction:error.issues', isValid?.error?.issues);
 
   if (!isValid.success) {
     return {

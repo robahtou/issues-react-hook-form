@@ -14,10 +14,9 @@ import SubmitButton from '../components/SubmitButton';
 function Form() {
   const {
     register,
-    trigger,
     clearErrors,
     getValues,
-    setValue,
+    setError,
     formState: { isValid, errors }
   } = useForm<FormSchema>({
       resolver: zodResolver(formSchema),
@@ -25,7 +24,8 @@ function Form() {
       defaultValues: {
         title: '',
         firstName: '',
-        lastName: ''
+        lastName: '',
+        age: ''
       }
   });
 
@@ -38,25 +38,39 @@ function Form() {
     console.log('FormData', FormData);
     console.log('RHFData', getValues());
 
-    // pre-processing
-    // if you don't do this `title` we be an empty string and you'll have to `setValue` to `undefined`
+    // pre-process FormData to remove empty string form fields &
+    // prevent sending `undefined` to the server
     const title = FormData.get('title');
     if (title === '') FormData.delete('title');
 
-    // trigger validation
-    const isValid = await trigger()
+    console.log('FormData', FormData);
 
-    // if form is not valid, RHF will automatically set the errors
+    const _Formdata = {};
+    for (const pair of FormData.entries()) {
+      _Formdata[pair[0]] = pair[1];
+    }
+
+    console.log('_Formdata', _Formdata)
+    // Zod validation: returns an object with either:
+    // { success: true, data: T}
+    // { success: false, error: ZodError }
+    // const isValid = formSchema.safeParse(_formdata);
+
+    // if form is not valid, iterate over the errors and set them
     console.log('isValid', isValid)
-    if (!isValid) return;
+    if (!isValid.success) {
+      isValid.error.issues.forEach(issue => {
+        // Errors are set on RHF fields
+        setError(issue.path[0], {
+          message: issue.message
+        });
+      });
 
-    // post-processing
-    setValue('age', Number(FormData.get('age')));
+      return;
+    }
 
-    // RHF should show the mutates values
-    console.log('RHFData', getValues());
-
-    return formAction(getValues());
+    console.log('ZodData', isValid.data);
+    return formAction(isValid.data);
   };
 
   console.log('useForm isValid', isValid);

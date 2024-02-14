@@ -32,7 +32,9 @@ const formSchema = z.object({
     })
     .int()
     .gte(18, { message: 'Age must be greater than 18' })
-});
+    .or(z.string()) // TS for default values which FormData always passes as string
+  })
+  .strict();
 
 type FormSchema = z.infer<typeof formSchema>;
 
