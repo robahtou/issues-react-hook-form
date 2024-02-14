@@ -18,7 +18,7 @@ function Form() {
     clearErrors,
     getValues,
     setValue,
-    formState: { isValid, errors }
+    formState: { isValid, errors, dirtyFields }
   } = useForm<FormSchema>({
       resolver: zodResolver(formSchema),
       mode: 'onSubmit',
@@ -52,8 +52,9 @@ function Form() {
     // post-processing
     setValue('age', Number(FormData.get('age')));
 
-    // RHF data to pass to server action
+    // use `getValues` or `dirtyFields` to remove any undefined or empty string values
     console.log('RHFData', getValues());
+    console.log('RHFDirtyFields', dirtyFields);
 
     return formAction(getValues());
   };
