@@ -38,23 +38,21 @@ function Form() {
     console.log('FormData', FormData);
     console.log('RHFData', getValues());
 
-    // pre-process FormData to remove empty string form fields &
+    // pre-process FormData to remove empty strings from form fields &
     // prevent sending `undefined` to the server
     const title = FormData.get('title');
     if (title === '') FormData.delete('title');
-
-    console.log('FormData', FormData);
 
     const _Formdata = {};
     for (const pair of FormData.entries()) {
       _Formdata[pair[0]] = pair[1];
     }
 
-    console.log('_Formdata', _Formdata)
+    console.log('_Formdata', _Formdata);
     // Zod validation: returns an object with either:
     // { success: true, data: T}
     // { success: false, error: ZodError }
-    // const isValid = formSchema.safeParse(_formdata);
+    const isValid = formSchema.safeParse(_Formdata);
 
     // if form is not valid, iterate over the errors and set them
     console.log('isValid', isValid)
