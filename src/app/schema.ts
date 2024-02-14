@@ -13,22 +13,22 @@ const formSchema = z.object({
     .optional(),
 
   firstName: z.string({
-      required_error: "First name is required by zod",
-      invalid_type_error: "First name must be a string by zod",
+      required_error: 'First name is required by zod',
+      invalid_type_error: 'First name must be a string by zod',
     })
     .min(2, { message: 'First name must be at least 2 characters long' })
     .max(32, { message: 'First name must be at most 32 characters long' }),
 
   lastName: z.string({
-      required_error: "Last name is required by zod",
-      invalid_type_error: "Last name must be a string by zod",
+      required_error: 'Last name is required by zod',
+      invalid_type_error: 'Last name must be a string by zod',
     })
     .min(2, { message: 'Last name must be at least 2 characters long' })
     .max(32, { message: 'Last name must be at most 32 characters long' }),
 
   age: z.coerce.number({
-      required_error: "Age is required by zod",
-      invalid_type_error: "Age must be a number by zod",
+      required_error: 'Age is required by zod',
+      invalid_type_error: 'Age must be a number by zod',
     })
     .int()
     .gte(18, { message: 'Age must be greater than 18' })

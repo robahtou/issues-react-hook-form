@@ -39,12 +39,11 @@ function Form() {
     console.log('RHFData', getValues());
 
     // pre-processing
-    // if you don't do this `title` we be an empty string and you'll have to `setValue` to `undefined`
     const title = FormData.get('title');
-    if (title === '') FormData.delete('title');
+    if (title === '') setValue('title', undefined);
 
     // trigger validation
-    const isValid = await trigger()
+    const isValid = await trigger();
 
     // if form is not valid, RHF will automatically set the errors
     console.log('isValid', isValid)
@@ -53,7 +52,7 @@ function Form() {
     // post-processing
     setValue('age', Number(FormData.get('age')));
 
-    // RHF should show the mutates values
+    // RHF data to pass to server action
     console.log('RHFData', getValues());
 
     return formAction(getValues());
