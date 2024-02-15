@@ -20,13 +20,17 @@ function Form() {
     setValue,
     formState: { isValid, errors }
   } = useForm<FormSchema>({
-      resolver:  ajvResolver(formSchema, { allErrors: true, allowUnionTypes: true }),
+      resolver:
+        ajvResolver(formSchema, {
+          allErrors: true,
+          allowUnionTypes: true,
+          coerceTypes: true
+        }),
       mode: 'onSubmit',
       defaultValues: {
         title: '',
         firstName: '',
-        lastName: '',
-        age: ''
+        lastName: ''
       }
   });
 
@@ -39,7 +43,7 @@ function Form() {
     console.log('FormData', FormData);
     console.log('RHFData', getValues());
 
-    // pre-processing
+    // pre-processing optional field values
     const title = FormData.get('title');
     if (title === '') setValue('title', undefined);
 
@@ -50,8 +54,8 @@ function Form() {
     console.log('isValid', isValid)
     if (!isValid) return;
 
-    // post-processing
-    setValue('age', Number(FormData.get('age')));
+    // post-processing (see readme for more details)
+    // setValue('age', Number(FormData.get('age')));
 
     // RHF data to pass to server action
     console.log('RHFData', getValues());
@@ -71,6 +75,9 @@ function Form() {
           placeholder="Title"
           {...register('title', { required: false })}
         />
+        <span>
+          {errors && errors.title && errors.title.message}
+        </span>
       </div>
 
       <div>
@@ -80,6 +87,9 @@ function Form() {
           placeholder="First name"
           {...register('firstName', { required: true })}
         />
+        <span>
+          {errors && errors.firstName && errors.firstName.message}
+        </span>
       </div>
 
       <div>
@@ -89,13 +99,15 @@ function Form() {
           placeholder="Last name"
           {...register('lastName', { required: true })}
         />
+        <span>
+          {errors && errors.lastName && errors.lastName.message}
+        </span>
       </div>
 
       <div>
         <label htmlFor="age">Age</label>
         <input id="age"
-          // type="number"
-          type="string"
+          type="text"
           placeholder="Age"
           {...register('age', { required: true })}
         />

@@ -2,10 +2,16 @@
 
 import Ajv from 'ajv';
 import type { ErrorObject } from 'ajv';
+import ajvErrors from 'ajv-errors';
+
 import formSchema from './schema';
 
 
-const ajv = new Ajv({ allErrors: true, allowUnionTypes: true });
+const ajv = new Ajv({ allErrors: true, allowUnionTypes: true, strict: 'log' });
+ajvErrors(ajv, {
+  singleError: true,
+  keepErrors: false,
+});
 const validate = ajv.compile(formSchema);
 
 
