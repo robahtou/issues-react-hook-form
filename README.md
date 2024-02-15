@@ -15,3 +15,4 @@ WIP
 * https://react-hook-form.com
 * https://ajv.js.org
 * https://zod.dev
+* [ Zod's .transform not affecting .getValues](https://github.com/react-hook-form/react-hook-form/issues/10802)
