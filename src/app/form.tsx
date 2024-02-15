@@ -1,8 +1,11 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useFormState } from 'react-dom';
 import { useForm } from 'react-hook-form';
-import { ajvResolver } from '@hookform/resolvers/ajv';
+
+import Ajv from 'ajv';
+import ajvErrors from 'ajv-errors';
 
 import ServerAction from './actions';
 import formSchema from './schema';
@@ -11,27 +14,27 @@ import type { FormSchema } from './schema';
 import SubmitButton from '../components/SubmitButton';
 
 
+const ajv = new Ajv({
+  allErrors: true,
+  allowUnionTypes: true,
+  coerceTypes: true
+});
+ajvErrors(ajv, {
+  singleError: true,
+  keepErrors: false,
+});
+const validate = ajv.compile(formSchema);
+
+
 function Form() {
   const {
     register,
-    trigger,
     clearErrors,
     getValues,
-    setValue,
+    setError,
     formState: { isValid, errors }
   } = useForm<FormSchema>({
-      resolver:
-        ajvResolver(formSchema, {
-          allErrors: true,
-          allowUnionTypes: true,
-          coerceTypes: true
-        }),
-      mode: 'onSubmit',
-      defaultValues: {
-        title: '',
-        firstName: '',
-        lastName: ''
-      }
+      mode: 'onSubmit'
   });
 
   const initialState = { success: false, errors: [] };
@@ -43,28 +46,57 @@ function Form() {
     console.log('FormData', FormData);
     console.log('RHFData', getValues());
 
-    // pre-processing optional field values
+    // pre-processing optional field values by removing empty strings &
+    // prevent sending `undefined` to the server
     const title = FormData.get('title');
-    if (title === '') setValue('title', undefined);
+    if (title === '') FormData.delete('title');
 
-    // trigger validation
-    const isValid = await trigger();
+    const _Formdata = {};
+    for (const pair of FormData.entries()) {
+      _Formdata[pair[0]] = pair[1];
+    }
 
-    // if form is not valid, RHF will automatically set the errors
-    console.log('isValid', isValid)
-    if (!isValid) return;
+    console.log('_Formdata', _Formdata);
 
-    // post-processing (see readme for more details)
-    // setValue('age', Number(FormData.get('age')));
+    // AJV validation
+    try {
+      const data = await validate(_Formdata);
 
-    // RHF data to pass to server action
-    console.log('RHFData', getValues());
+      console.log('AJV data', data);
+      return formAction(_Formdata);
 
-    return formAction(getValues());
+    } catch (error) {
+      if (!(error instanceof Ajv.ValidationError)) throw error;
+
+      error.errors.forEach(err => {
+        const { instancePath, message } = err;
+        // Errors are set on RHF fields
+        console.log(err)
+        setError(instancePath.replace('/', ''), {
+          message
+        });
+      });
+
+      return;
+    }
   };
+
+  // handle responses from the server
+  useEffect(() => {
+    if (!serverReply.success) {
+      serverReply.errors.forEach(err => {
+        const { instancePath, message } = err;
+        setError(instancePath.replace('/', ''), {
+          message
+        });
+      });
+    }
+
+  }, [serverReply]);
 
   console.log('useForm isValid', isValid);
   console.log('useForm errors', errors);
+  console.log(serverReply);
 
   return (
     <form action={handleAction}>

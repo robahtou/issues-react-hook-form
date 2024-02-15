@@ -17,28 +17,30 @@ const validate = ajv.compile(formSchema);
 
 type Result = {
   success: boolean,
-  errors: ErrorObject<string, Record<string, any>, unknown>[] | null | undefined
+  errors: null | Partial<ErrorObject<string, Record<string, any>, unknown>>[]
 };
 
 async function ServerAction(prevState: Result, ajvData: any): Promise<Result> {
   console.log('ServerAction:formData', ajvData);
 
-  const isValid = validate(ajvData);
+  try {
+    const data = await validate(ajvData);
+    console.log('ServerAction:AJVdata', data);
 
-  console.log('ServerAction:isValid', isValid);
-  console.log('ServerAction:errors', validate.errors);
+    return {
+      success: true,
+      errors: null
+    }
+  } catch (error) {
+    if (!(error instanceof Ajv.ValidationError)) throw error;
 
-  if (!isValid) {
+    console.log('ServerAction:AJVerror', error.errors)
+
     return {
       success: false,
-      errors: validate.errors
-    };
+      errors: error.errors
+    }
   }
-
-  return {
-    success: true,
-    errors: null
-  };
 }
 
 

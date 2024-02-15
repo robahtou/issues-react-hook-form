@@ -9,6 +9,7 @@ interface FormSchema {
 };
 
 const formSchema: JSONSchemaType<FormSchema> = {
+  $async: true,
   type: 'object',
   properties: {
     title: {
